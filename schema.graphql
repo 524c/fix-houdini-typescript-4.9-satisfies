@@ -1,0 +1,218 @@
+"""Response object for authentication queries"""
+type AuthResult {
+  token: String!
+  user: User!
+}
+
+type BaseError implements Error {
+  message: String!
+}
+
+scalar Date
+
+interface Error {
+  message: String!
+}
+
+input FUserInput {
+  email: String!
+  name: String!
+  password: String
+  provider: OauthProviders!
+  subject: String!
+}
+
+"""Response object for authentication queries"""
+type FUserResult {
+  fuser: FederatedUser!
+  token: String!
+}
+
+"""User object type"""
+type FederatedUser {
+  createdAt: Date!
+  id: ID!
+  pk: Int!
+  provider: OauthProviders!
+  subject: String!
+  updatedAt: Date!
+  user: User!
+  userId: String!
+}
+
+scalar File
+
+"""Response object for file upload"""
+type IUploadMix {
+  media: MediaFILE!
+  medias: [MediaFILE!]!
+}
+
+"""Media object"""
+type Media {
+  createdAt: Date!
+  filename: String!
+  id: ID!
+  mimetype: String!
+  pk: Int!
+  updatedAt: Date!
+  url: String!
+}
+
+"""Response object for file upload"""
+type MediaFILE {
+  filename: String!
+  mimetype: String!
+  url: String!
+}
+
+type Mutation {
+  """Create Federated User"""
+  FederatedSignin(input: FUserInput!): MutationFederatedSigninResult!
+
+  """Change users password"""
+  changePassword(newPassword: String!, oldPassword: String!): SuccessResult!
+
+  """Sign in user"""
+  signin(email: String!, password: String!): MutationSigninResult!
+
+  """Sign out user"""
+  signout: SuccessResult!
+
+  """Sign up new user"""
+  signup(email: String!, name: String!, password: String!): MutationSignupResult!
+
+  """Update info for a user"""
+  updateUser(input: UpdateUserInput!): MutationUpdateUserResult!
+
+  """Upload single file"""
+  uploadMix(file: File!, files: [File!]!): IUploadMix!
+
+  """Upload multiple files"""
+  uploadMultipleFiles(files: [File!]!): [MediaFILE!]!
+
+  """Upload single file"""
+  uploadSingleFile(file: File!): MediaFILE!
+}
+
+union MutationFederatedSigninResult = BaseError | MutationFederatedSigninSuccess | ZodError
+
+type MutationFederatedSigninSuccess {
+  data: FUserResult!
+}
+
+union MutationSigninResult = BaseError | MutationSigninSuccess | ZodError
+
+type MutationSigninSuccess {
+  data: AuthResult!
+}
+
+union MutationSignupResult = BaseError | MutationSignupSuccess | ZodError
+
+type MutationSignupSuccess {
+  data: AuthResult!
+}
+
+union MutationUpdateUserResult = BaseError | MutationUpdateUserSuccess | ZodError
+
+type MutationUpdateUserSuccess {
+  data: User!
+}
+
+enum OauthProviders {
+  APPLE
+  FACEBOOK
+  GOOGLE
+}
+
+type Query {
+  """Crypt jwt"""
+  Signer(data: String!): QuerySignerResult!
+
+  """returns all users data"""
+  allUsers: QueryAllUsersResult!
+  hello(name: String): QueryHelloResult!
+
+  """Authorize user session"""
+  me: QueryMeResult
+
+  """returns user data"""
+  user(userId: String!): QueryUserResult!
+
+  """returns info for a user"""
+  userPk(pk: Int!): QueryUserPkResult!
+}
+
+union QueryAllUsersResult = BaseError | QueryAllUsersSuccess | ZodError
+
+type QueryAllUsersSuccess {
+  data: [User!]!
+}
+
+union QueryHelloResult = BaseError | QueryHelloSuccess | ZodError
+
+type QueryHelloSuccess {
+  data: String!
+}
+
+union QueryMeResult = BaseError | QueryMeSuccess | ZodError
+
+type QueryMeSuccess {
+  data: User!
+}
+
+union QuerySignerResult = BaseError | QuerySignerSuccess | ZodError
+
+type QuerySignerSuccess {
+  data: String!
+}
+
+union QueryUserPkResult = BaseError | QueryUserPkSuccess | ZodError
+
+type QueryUserPkSuccess {
+  data: User!
+}
+
+union QueryUserResult = BaseError | QueryUserSuccess | ZodError
+
+type QueryUserSuccess {
+  data: User!
+}
+
+"""Response object for successful queries"""
+type SuccessResult {
+  success: Boolean!
+}
+
+input UpdateUserInput {
+  avatarUrl: String
+  name: String
+}
+
+"""User object type"""
+type User {
+  avatarUrl: String
+  createdAt: Date!
+  email: String!
+  id: ID!
+  name: String!
+  pk: Int!
+  role: UserRole!
+  updatedAt: Date!
+}
+
+enum UserRole {
+  ADMIN
+  SUPERADMIN
+  USER
+}
+
+type ZodError implements Error {
+  fieldErrors: [ZodFieldError!]!
+  message: String!
+}
+
+type ZodFieldError {
+  message: String!
+  path: [String!]!
+}
